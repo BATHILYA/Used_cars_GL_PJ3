@@ -24,6 +24,7 @@ settings:
 
 jobs:
   prep_data:
+    compute: azureml:pj3-cpu-cluster
     name: prep_data  # Provide the job name
     display_name: prep-data  # Provide the display name for the job
     code: ../../../data-science/src
@@ -40,6 +41,7 @@ jobs:
       test_data: ${{parent.outputs.test_data}}
 
   sweep_step:
+    compute: azureml:pj3-cpu-cluster
     name: sweep_job
     display_name: sweep-job  # Hint: Provide the display name for the job
     type: sweep
@@ -68,6 +70,7 @@ jobs:
 
 
   register_model:
+    compute: azureml:pj3-cpu-cluster
     name: register_model  # Provide the job name
     display_name: register-model  # Provide the display name for the job
     code: ../../../data-science/src
