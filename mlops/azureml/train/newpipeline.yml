@@ -7,7 +7,7 @@ description: Training Pipeline to predict used cars prices using random forest r
 inputs:
   raw_data:
     type: uri_file
-    path: azureml:used-cars-data@latest
+    path: azureml:used-cars-price-data@latest
 
 outputs:
   train_data:
