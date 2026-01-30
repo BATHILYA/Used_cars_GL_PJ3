@@ -19,4 +19,5 @@ variables:
 
   # For pipeline reference
   resource_group: "gl_res_grp"
-  aml_workspace: "pj3_wrkspce"
+  aml_workspace: "pj3-wrkspce"
+
