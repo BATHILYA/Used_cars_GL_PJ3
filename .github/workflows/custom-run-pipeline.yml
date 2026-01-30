@@ -48,6 +48,31 @@ jobs:
         run: az extension add -n ml -y
       - name: update-extension
         run: az extension update -n ml
+
+      - name: DEBUG - Check workspace + data asset exists
+        run: |
+          echo "RG=${{ inputs.resource_group }}"
+          echo "WS=${{ inputs.workspace_name }}"
+          echo "PIPELINE_FILE=${{ inputs.parameters-file }}"
+          echo "Listing data assets named used-cars-price-data (if any):"
+          az ml data list \
+            --resource-group ${{ inputs.resource_group }} \
+            --workspace-name ${{ inputs.workspace_name }} \
+            --query "[?name=='used-cars-price-data'].{name:name,version:version,id:id}" \
+            -o table
+
+          echo "Listing ALL data assets (first 50) to sanity-check naming:"
+          az ml data list \
+            --resource-group ${{ inputs.resource_group }} \
+            --workspace-name ${{ inputs.workspace_name }} \
+            --query "[0:50].{name:name,version:version}" \
+            -o table
+
+
+
+
+
+        
       - name: run-ml-pipeline
         run: |
           run_id=$(az ml job create --file ${{ github.workspace }}/${{ inputs.parameters-file  }} --resource-group ${{ inputs.resource_group }} --workspace-name ${{ inputs.workspace_name }} --query name -o tsv)
@@ -75,3 +100,4 @@ jobs:
             echo "Training Job failed or canceled"
             exit 3
           fi
+
