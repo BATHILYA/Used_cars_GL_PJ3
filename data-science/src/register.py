@@ -47,6 +47,7 @@ def main(args):
     print("Writing JSON")
     model_info = {"id": f"{args.model_name}:{model_version}"}
     output_path = os.path.join(args.model_info_output_path, "model_info.json")
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)   
     with open(output_path, "w") as of:
         json.dump(model_info, of)                                                                                                                 
 if __name__ == "__main__":
