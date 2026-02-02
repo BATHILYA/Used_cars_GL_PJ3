@@ -79,3 +79,5 @@ jobs:
       #   AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       secrets:
           creds: ${{secrets.AZURE_CREDENTIALS}}
+
+  create_frontend-hgf:
