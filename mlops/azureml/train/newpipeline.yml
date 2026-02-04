@@ -31,6 +31,7 @@ settings:
 
 jobs:
   prep_data:
+    type: command
     compute: azureml:pj3-ds11-cluster
     name: prep_data  # Provide the job name
     display_name: prep-data  # Provide the display name for the job
@@ -77,6 +78,7 @@ jobs:
 
 
   register_model:
+    type: command
     compute: azureml:pj3-ds11-cluster
     name: register_model  # Provide the job name
     display_name: register-model  # Provide the display name for the job
@@ -95,6 +97,7 @@ jobs:
 
 # ---------------- publish best model to HF Model repo ----------------
   publish_model_to_hf_model:
+    type: command
     compute: azureml:pj3-ds11-cluster
     name: publish_model_to_hf_model
     display_name: Publish best model to HF Model repo
@@ -120,9 +123,9 @@ jobs:
 
   # ---------------- push Space files to HF Space (runs AFTER publish) ----------------
   push_space_files_to_hf:
-    depends_on: publish_model_to_hf_model
+    type: command
+    depends_on: [publish_model_to_hf_model]
     compute: azureml:pj3-ds11-cluster
-    name: push_space_files_to_hf
     display_name: Push Space files to Hugging Face
     code: ../../../
     environment: azureml:hf-push-env@latest
@@ -134,4 +137,5 @@ jobs:
       python data-science/src/push_space_files_to_hf.py
       --deployment_dir HGF_deployment
       --space_repo_id ${{inputs.space_repo_id}}
+
 
