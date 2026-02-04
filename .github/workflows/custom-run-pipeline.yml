@@ -18,6 +18,8 @@ on:
     secrets:
       creds:
         required: true
+      hf_token:
+        required: true
 jobs:
   run-pipeline:
     runs-on: ubuntu-latest
@@ -50,7 +52,7 @@ jobs:
         run: az extension update -n ml
       - name: run-ml-pipeline
         run: |
-          run_id=$(az ml job create --file ${{ github.workspace }}/${{ inputs.parameters-file  }} --resource-group ${{ inputs.resource_group }} --workspace-name ${{ inputs.workspace_name }} --query name -o tsv)
+          run_id=$(az ml job create --file ${{ github.workspace }}/${{ inputs.parameters-file  }} --resource-group ${{ inputs.resource_group }} --workspace-name ${{ inputs.workspace_name }} --set inputs.hf_token="${{ secrets.hf_token }}" --query name -o tsv)
           if [[ -z "$run_id" ]]
           then
             echo "Job creation failed"

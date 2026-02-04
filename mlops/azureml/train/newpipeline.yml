@@ -8,6 +8,27 @@ inputs:
   raw_data:
     type: uri_file
     path: azureml:used-cars-price-data@latest
+    
+  hf_token:
+    type: string
+    default: ""   
+  
+  hf_model_repo_id:
+    type: string
+    default: "AbdramaneB/used-cars-price-model"
+
+  hf_space_repo_id:
+    type: string
+    default: "AbdramaneB/used-cars-price-prediction"
+
+  model_filename:
+    type: string
+    default: "best_price_model_v2.joblib"
+
+  revision_note:
+    type: string
+    default: "Model published from AzureML pipeline"
+
 
 outputs:
   train_data:
@@ -85,4 +106,46 @@ jobs:
       model_path: ${{parent.jobs.sweep_step.outputs.model_output}}
     outputs:
       model_info_output_path: ${{parent.outputs.model_info_output_path}}
+
+# ---------------- publish best model to HF Model repo ----------------
+  publish_model_to_hf_model:
+    compute: azureml:pj3-ds11-cluster
+    name: publish_model_to_hf_model
+    display_name: Publish best model to HF Model repo
+    code: ../../../data-science/src
+    environment: azureml:hf-push-env@latest
+    environment_variables:
+      HF_TOKEN: ${{parent.inputs.hf_token}}
+    inputs:
+      model_dir: ${{parent.jobs.sweep_step.outputs.model_output}}
+      model_repo_id: ${{parent.inputs.hf_model_repo_id}}
+      model_filename: ${{parent.inputs.model_filename}}
+      revision_note: ${{parent.inputs.revision_note}}
+    outputs:
+      done:
+        type: uri_file
+    command: >-
+      python export_and_push_model_to_hf_model_repo.py
+      --model_dir ${{inputs.model_dir}}
+      --model_repo_id ${{inputs.model_repo_id}}
+      --model_filename ${{inputs.model_filename}}
+      --revision_note "${{inputs.revision_note}}"
+      --done_out ${{outputs.done}}
+
+  # ---------------- push Space files to HF Space (runs AFTER publish) ----------------
+  push_space_files_to_hf:
+    compute: azureml:pj3-ds11-cluster
+    name: push_space_files_to_hf
+    display_name: Push Space files to Hugging Face
+    code: ../../../
+    environment: azureml:hf-push-env@latest
+    environment_variables:
+      HF_TOKEN: ${{parent.inputs.hf_token}}
+    inputs:
+      space_repo_id: ${{parent.inputs.hf_space_repo_id}}
+      after_publish: ${{parent.jobs.publish_model_to_hf_model.outputs.done}}  # forces sequencing
+    command: >-
+      python data-science/src/push_space_files_to_hf.py
+      --deployment_dir HGF_deployment
+      --space_repo_id ${{inputs.space_repo_id}}
 

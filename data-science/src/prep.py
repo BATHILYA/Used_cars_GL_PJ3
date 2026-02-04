@@ -4,40 +4,45 @@
 Prepares raw data and provides training and test datasets.
 """
 
-import argparse
-from pathlib import Path
 import os
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
+import argparse
+import logging
 import mlflow
+import pandas as pd  
+from sklearn.preprocessing import LabelEncoder                                           
+from sklearn.model_selection import train_test_split
+from pathlib import Path
+
 
 def parse_args():
     '''Parse input arguments'''
 
     parser = argparse.ArgumentParser("prep")  # Create an ArgumentParser object
     parser.add_argument("--raw_data", type=str, help="Path to raw data")  # Specify the type for raw data (str)
+    parser.add_argument("--test_train_ratio", type=float, default=0.2, help="Test-train ratio")  # Specify the type (float) and default value (0.2) for test-train ratio
     parser.add_argument("--train_data", type=str, help="Path to train dataset")  # Specify the type for train data (str)
     parser.add_argument("--test_data", type=str, help="Path to test dataset")  # Specify the type for test data (str)
-    parser.add_argument("--test_train_ratio", type=float, default=0.2, help="Test-train ratio")  # Specify the type (float) and default value (0.2) for test-train ratio
     args = parser.parse_args()
 
     return args
 
 def main(args):  # Write the function name for the main data preparation logic
     '''Read, preprocess, split, and save datasets'''
+    # Log arguments
+    logging.info(f"Input data path: {args.raw_data}")
+    logging.info(f"Test-train ratio: {args.test_train_ratio}")                                                         
 
     # Reading Data
     df = pd.read_csv(args.raw_data)
 
     # ------- WRITE YOUR CODE HERE -------
-
     # Step 1: Perform label encoding to convert categorical features into numerical values for model compatibility.  
     # Encoding the categorical 'Segment' column
     # Note: We should ideally use one-hot encoding here as there's no inherent order between the categories
     # However, as we're using a decision tree model, label encoding also works here
     label_encoder = LabelEncoder()
     df['Segment'] = label_encoder.fit_transform(df['Segment'])
+
 
     # Step 2: Split the dataset into training and testing sets using train_test_split with specified test size and random state.  
     # Split Data into train and test datasets
@@ -51,13 +56,12 @@ def main(args):  # Write the function name for the main data preparation logic
     train_df.to_csv(os.path.join(args.train_data, "train.csv"), index=False)
     test_df.to_csv(os.path.join(args.test_data, "test.csv"), index=False)
 
-
     # Step 4: Log the number of rows in the training and testing datasets as metrics for tracking and evaluation.  
-
     # Log the metrics
     mlflow.log_metric('train size', train_df.shape[0])
     mlflow.log_metric('test size', test_df.shape[0])
 if __name__ == "__main__":
+    
     mlflow.start_run()
 
     # Parse Arguments

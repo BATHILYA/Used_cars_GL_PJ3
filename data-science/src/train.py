@@ -3,18 +3,19 @@
 """
 Trains ML model using training dataset and evaluates using test dataset. Saves trained model.
 """
-
+# Required imports for training
+import mlflow
 import argparse
-from pathlib import Path
+import os
 import pandas as pd
+from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import r2_score
-import mlflow
+from pathlib import Path
 import mlflow.sklearn
 
 def parse_args():
     '''Parse input arguments'''
-
     parser = argparse.ArgumentParser("train")
     
     # Step 1: Define arguments for train data, test data, model output, and RandomForest hyperparameters.  
@@ -40,9 +41,10 @@ def main(args):
 
     # Step 3: Split the data into features (X) and target (y) for both train and test datasets.   
     y_train = train_df["price"].values  # 'price' is the target variable in this case study
-    X_train = train_df.drop("price", axis=1).values
-    y_test = test_df["price"].values  # 'price' is the target variable for testing
-    X_test = test_df.drop("price", axis=1).values
+    X_train = train_df.drop("price", axis=1).values     # Dropping the 'price' column from train_df to get the features and converting to array for model training
+    y_test = test_df["price"].values  # 'price' is the target variable for testing                                                                                     
+    X_test = test_df.drop("price", axis=1).values     # Dropping the 'price' column from test_df to get the features and converting to array for model testing
+
 
     # Step 4: Initialize the RandomForest Regressor with specified hyperparameters, and train the model using the training data.  
     # Initialize and train a RandomForest Regressor
@@ -57,6 +59,7 @@ def main(args):
     # Step 6: Predict target values on the test dataset using the trained model, and calculate the mean squared error.  
     rf_predictions = rf_model.predict(X_test)
 
+    # R2 is chosen as the evaluation metric for this case study as it is important to know the accuracy of the predictions.
     # Step 7: Log the R_squared metric in MLflow for model evaluation, and save the trained model to the specified output path.  
     # Compute and log R2 accuracy for test data
     r2 = r2_score(y_test, rf_predictions)
@@ -64,7 +67,6 @@ def main(args):
 
     # Logging the R2 score as a metric
     mlflow.log_metric("R_squared", float(r2))  # Log the R²
-
 
     # Save the trained model
     mlflow.sklearn.save_model(rf_model, args.model_output)

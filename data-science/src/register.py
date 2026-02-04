@@ -4,10 +4,12 @@
 Registers the best-trained ML model from the sweep job.
 """
 
+import os
 import argparse
-from pathlib import Path
+import logging
 import mlflow
-import os 
+import pandas as pd
+from pathlib import Path         
 import json
 
 def parse_args():
@@ -33,6 +35,8 @@ def main(args):
     
     # Step 2: Log the loaded model in MLflow with the specified model name for versioning and tracking.  
     # Log model using mlflow
+    print("Registering the best trained used cars price prediction model")
+
     mlflow.sklearn.log_model(model, args.model_name)
     
     # Step 3: Register the logged model using its URI and model name, and retrieve its registered version.  
@@ -49,10 +53,11 @@ def main(args):
     output_path = args.model_info_output_path
     os.makedirs(os.path.dirname(output_path), exist_ok=True)   
     with open(output_path, "w") as of:
-        json.dump(model_info, of)                                                                                                                 
+        json.dump(model_info, of)    
+        
 if __name__ == "__main__":
     
-    mlflow.start_run()
+    mlflow.start_run() # Starting the MLflow experiment run
     
     # Parse Arguments
     args = parse_args()
@@ -67,5 +72,4 @@ if __name__ == "__main__":
         print(line)
 
     main(args)
-
-    mlflow.end_run()
+    mlflow.end_run() # End the MLflow run
