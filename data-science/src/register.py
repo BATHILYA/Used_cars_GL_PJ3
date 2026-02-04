@@ -31,7 +31,7 @@ def main(args):
 
     # Step 1: Load the model from the specified path using `mlflow.sklearn.load_model` for further processing.  
     # Load model
-    model = mlflow.sklearn.load_model(args.model_path)
+    model = mlflow.sklearn.load_model(f"file://{args.model_path}")
     
     # Step 2: Log the loaded model in MLflow with the specified model name for versioning and tracking.  
     # Log model using mlflow
@@ -56,20 +56,15 @@ def main(args):
         json.dump(model_info, of)    
         
 if __name__ == "__main__":
-    
-    mlflow.start_run() # Starting the MLflow experiment run
-    
     # Parse Arguments
-    args = parse_args()
-    
+    args = parse_args()   
     lines = [
         f"Model name: {args.model_name}",
         f"Model path: {args.model_path}",
         f"Model info output path: {args.model_info_output_path}"
     ]
-
     for line in lines:
-        print(line)
-
-    main(args)
-    mlflow.end_run() # End the MLflow run
+        print(line)   
+    with mlflow.start_run(nested=True): # Starting the MLflow experiment run
+        main(args)
+    #mlflow.end_run() # End the MLflow run

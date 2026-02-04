@@ -28,7 +28,7 @@ def main():
         create_repo(repo_id=args.model_repo_id, repo_type="model", private=False)
 
     # Load MLflow model and export to joblib
-    model = mlflow.sklearn.load_model(args.model_dir)
+    model = mlflow.sklearn.load_model(f"file://{args.model_dir}")
     local_path = args.model_filename
     joblib.dump(model, local_path)
 
@@ -41,7 +41,8 @@ def main():
         commit_message=args.revision_note,
     )
 
-    # Optional: upload a simple model card
+    # Write and upload a simple model card
+    readme_path = "README.md"         
     card = f"""---
         tags:
         - regression
@@ -54,7 +55,7 @@ def main():
         This repository contains the exported model artifact: `{args.model_filename}`.
         """
     api.upload_file(
-        path_or_fileobj=card.encode("utf-8"),
+        path_or_fileobj=readme_path,
         path_in_repo="README.md",
         repo_id=args.model_repo_id,
         repo_type="model",
@@ -62,7 +63,7 @@ def main():
     )
 
     os.makedirs(os.path.dirname(args.done_out), exist_ok=True)
-    with open(args.done_out, "w") as f:
+    with open(args.done_out, "w", encoding="utf-8") as f:
         f.write("done")
 
     print("✅ Published model to HF model repo:", args.model_repo_id)

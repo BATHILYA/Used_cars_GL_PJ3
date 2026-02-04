@@ -69,12 +69,10 @@ def main(args):
     mlflow.log_metric("R_squared", float(r2))  # Log the R²
 
     # Save the trained model
+    os.makedirs(args.model_output, exist_ok=True)
     mlflow.sklearn.save_model(rf_model, args.model_output)
 
 if __name__ == "__main__":
-    
-    mlflow.start_run()
-
     # Parse Arguments
     args = parse_args()
 
@@ -87,9 +85,10 @@ if __name__ == "__main__":
     ]
 
     for line in lines:
-        print(line)
+        print(line)    
+    with mlflow.start_run(nested=True):
 
-    main(args)
+        main(args)
 
-    mlflow.end_run()
+    # mlflow.end_run()
 

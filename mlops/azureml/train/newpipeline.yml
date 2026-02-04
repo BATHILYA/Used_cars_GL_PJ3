@@ -8,26 +8,12 @@ inputs:
   raw_data:
     type: uri_file
     path: azureml:used-cars-price-data@latest
-    
-  hf_token:
-    type: string
-    default: ""   
   
-  hf_model_repo_id:
-    type: string
-    default: "AbdramaneB/used-cars-price-model"
-
-  hf_space_repo_id:
-    type: string
-    default: "AbdramaneB/used-cars-price-prediction"
-
-  model_filename:
-    type: string
-    default: "best_price_model_v2.joblib"
-
-  revision_note:
-    type: string
-    default: "Model published from AzureML pipeline"
+  hf_token: ""
+  hf_model_repo_id: "AbdramaneB/used-cars-price-model"
+  hf_space_repo_id: "AbdramaneB/used-cars-price-prediction"
+  model_filename: "best_price_model_v2.joblib"
+  revision_note: "Model published from AzureML pipeline"
 
 
 outputs:
@@ -134,6 +120,7 @@ jobs:
 
   # ---------------- push Space files to HF Space (runs AFTER publish) ----------------
   push_space_files_to_hf:
+    depends_on: publish_model_to_hf_model
     compute: azureml:pj3-ds11-cluster
     name: push_space_files_to_hf
     display_name: Push Space files to Hugging Face
@@ -143,7 +130,6 @@ jobs:
       HF_TOKEN: ${{parent.inputs.hf_token}}
     inputs:
       space_repo_id: ${{parent.inputs.hf_space_repo_id}}
-      after_publish: ${{parent.jobs.publish_model_to_hf_model.outputs.done}}  # forces sequencing
     command: >-
       python data-science/src/push_space_files_to_hf.py
       --deployment_dir HGF_deployment

@@ -61,9 +61,6 @@ def main(args):  # Write the function name for the main data preparation logic
     mlflow.log_metric('train size', train_df.shape[0])
     mlflow.log_metric('test size', test_df.shape[0])
 if __name__ == "__main__":
-    
-    mlflow.start_run()
-
     # Parse Arguments
     args = parse_args()  # Call the function to parse arguments
 
@@ -75,8 +72,10 @@ if __name__ == "__main__":
     ]
 
     for line in lines:
-        print(line)
-    
-    main(args)
+        print(line)    
+        
+    with mlflow.start_run(nested=True):
 
-    mlflow.end_run()
+        main(args)
+
+    # mlflow.end_run()
