@@ -123,19 +123,10 @@ jobs:
 
   # ---------------- push Space files to HF Space (runs AFTER publish) ----------------
   push_space_files_to_hf:
-    type: command
     depends_on: [publish_model_to_hf_model]
-    compute: azureml:pj3-ds11-cluster
-    display_name: Push Space files to Hugging Face
-    code: ../../../
-    environment: azureml:hf-push-env@latest
+    component: ./push_space_files_to_hf.yml
     environment_variables:
       HF_TOKEN: ${{parent.inputs.hf_token}}
     inputs:
       space_repo_id: ${{parent.inputs.hf_space_repo_id}}
-    command: >-
-      python data-science/src/push_space_files_to_hf.py
-      --deployment_dir HGF_deployment
-      --space_repo_id ${{inputs.space_repo_id}}
-
 
