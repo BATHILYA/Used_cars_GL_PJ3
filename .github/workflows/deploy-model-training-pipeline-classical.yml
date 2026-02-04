@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
+      - pj3_HGF
   pull_request:
     branches:
       - main
+      - pj3_HGF
 
 jobs:
   get-config:
