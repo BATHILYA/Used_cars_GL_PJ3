@@ -1,0 +1,16 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+type: command
+name: push_space_files_to_hf
+display_name: Push Space files to Hugging Face
+
+inputs:
+  space_repo_id:
+    type: string
+
+code: ../../../
+environment: azureml:hf-push-env@latest
+
+command: >-
+  python data-science/src/push_space_files_to_hf.py
+  --deployment_dir HGF_deployment
+  --space_repo_id ${{inputs.space_repo_id}}
