@@ -16,7 +16,6 @@ from pathlib import Path
 
 def parse_args():
     '''Parse input arguments'''
-
     parser = argparse.ArgumentParser("prep")  # Create an ArgumentParser object
     parser.add_argument("--raw_data", type=str, help="Path to raw data")  # Specify the type for raw data (str)
     parser.add_argument("--test_train_ratio", type=float, default=0.2, help="Test-train ratio")  # Specify the type (float) and default value (0.2) for test-train ratio
@@ -41,9 +40,9 @@ def main(args):  # Write the function name for the main data preparation logic
         "luxury segment": 0,
         "non-luxury segment": 1,
     }
-    unknown = set(df["Segment"].dropna().unique()) - set(segment_map.keys())
-    if unknown:
-        raise ValueError(f"Unknown Segment values found: {sorted(unknown)}")
+
+
+
     df["Segment"] = df["Segment"].map(segment_map).astype(int)
     mlflow.log_param("segment_encoding", str(segment_map))
 
@@ -62,8 +61,8 @@ def main(args):  # Write the function name for the main data preparation logic
 
     # Step 4: Log the number of rows in the training and testing datasets as metrics for tracking and evaluation.  
     # Log the metrics
-    mlflow.log_metric('train size', train_df.shape[0])
-    mlflow.log_metric('test size', test_df.shape[0])
+    mlflow.log_metric('train_rows', train_df.shape[0])
+    mlflow.log_metric('test_rows', test_df.shape[0])
 if __name__ == "__main__":
     # Parse Arguments
     args = parse_args()  # Call the function to parse arguments
