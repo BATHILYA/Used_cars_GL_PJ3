@@ -18,7 +18,6 @@ from azure.identity import DefaultAzureCredential
 
 def parse_args():
     '''Parse input arguments'''
-
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_name', type=str, help='Name under which model will be registered')  # Hint: Specify the type for model_name (str)
     parser.add_argument('--model_path', type=str, help='Model directory')  # Hint: Specify the type for model_path (str)
@@ -34,7 +33,12 @@ def main(args):
     print("Model path:", args.model_path)                                     
     print("Registering the best trained used cars price prediction model")
     
-    # AzureML SDK registration (avoids MLflow logged-models APIs that return 404)
+
+    # In AML jobs, these are typically available automatically:
+    sub_id = os.environ["AZUREML_ARM_SUBSCRIPTION"]
+    rg = os.environ["AZUREML_ARM_RESOURCEGROUP"]
+    ws = os.environ["AZUREML_ARM_WORKSPACE_NAME"]
+
     # Step 3: Register the logged model using its URI and model name, and retrieve its registered version.  
     credential = DefaultAzureCredential()
     ml_client = MLClient(

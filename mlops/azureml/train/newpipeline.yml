@@ -83,6 +83,13 @@ jobs:
     name: register_model  # Provide the job name
     display_name: register-model  # Provide the display name for the job
     code: ../../../data-science/src
+    environment: azureml:used-cars-train-env@latest
+
+    # ---- Inject SP creds for DefaultAzureCredential -> EnvironmentCredential ----
+    environment_variables:
+      AZURE_TENANT_ID: ${{parent.inputs.sp_tenant_id}}
+      AZURE_CLIENT_ID: ${{parent.inputs.sp_client_id}}
+      AZURE_CLIENT_SECRET: ${{parent.inputs.sp_client_secret}}                                                   
     command: >-
       python register.py 
       --model_name ${{inputs.model_name}} 
@@ -123,10 +130,18 @@ jobs:
 
   # ---------------- push Space files to HF Space (runs AFTER publish) ----------------
   push_space_files_to_hf:
-    depends_on: [publish_model_to_hf_model]
-    component: ./push_space_files_to_hf.yml
+    type: command
+    compute: azureml:pj3-ds11-cluster
+    name: push_space_files_to_hf
+    display_name: Push Space files to Hugging Face
+    code: ../../../
+    environment: azureml:hf-push-env@latest
     environment_variables:
       HF_TOKEN: ${{parent.inputs.hf_token}}
     inputs:
       space_repo_id: ${{parent.inputs.hf_space_repo_id}}
-
+      after_publish: ${{parent.jobs.publish_model_to_hf_model.outputs.done}}
+    command: >-
+      python data-science/src/push_space_files_to_hf.py
+      --deployment_dir HGF_deployment
+      --space_repo_id ${{inputs.space_repo_id}}
