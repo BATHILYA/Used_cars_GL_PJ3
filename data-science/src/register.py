@@ -11,6 +11,10 @@ import mlflow
 import pandas as pd
 from pathlib import Path         
 import json
+from azure.ai.ml import MLClient
+from azure.ai.ml.entities import Model
+from azure.identity import DefaultAzureCredential
+
 
 def parse_args():
     '''Parse input arguments'''
@@ -26,19 +30,32 @@ def parse_args():
 
 def main(args):
     '''Loads the best-trained model from the sweep job and registers it'''
-
     print("Registering ", args.model_name)
     print("Model path:", args.model_path)                                     
     print("Registering the best trained used cars price prediction model")
-    mlflow.log_artifacts(args.model_path, artifact_path=args.model_name)
     
+    # AzureML SDK registration (avoids MLflow logged-models APIs that return 404)
     # Step 3: Register the logged model using its URI and model name, and retrieve its registered version.  
-# Register logged model using mlflow
-    run_id = mlflow.active_run().info.run_id
-    model_uri = f'runs:/{run_id}/{args.model_name}'
-    mlflow_model = mlflow.register_model(model_uri, args.model_name)
-    model_version = mlflow_model.version
-    
+    credential = DefaultAzureCredential()
+    ml_client = MLClient(
+        credential=credential,
+        subscription_id=os.environ["AZUREML_ARM_SUBSCRIPTION"],
+        resource_group_name=os.environ["AZUREML_ARM_RESOURCEGROUP"],
+        workspace_name=os.environ["AZUREML_ARM_WORKSPACE_NAME"],
+    )
+
+    registered = ml_client.models.create_or_update(
+        Model(
+            name=args.model_name,
+            path=args.model_path,     # this is your sweep output folder
+            type="mlflow_model",
+            description="Best model from sweep job",
+        )
+    )
+
+    model_version = registered.version
+    print("Registered model version:", model_version)
+
     # Step 4: Write model registration details, including model name and version, into a JSON file in the specified output path.  
     # Write model info
     print("Writing JSON")
