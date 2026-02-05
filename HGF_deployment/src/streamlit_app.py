@@ -26,13 +26,43 @@ def load_model():
 def main():
     st.set_page_config(page_title="Used Cars Price Prediction", layout="centered")
     st.title("Used Cars Price Prediction App")
-                                                                   
+
     segment = st.selectbox("Segment", ["non-luxury segment", "luxury segment"], index=1)
-    kilometers_driven = st.number_input("Kilometers_Driven [km] (8350-262000)", min_value=0.0, value=170000.0, step=5000.0)
-    mileage = st.number_input("Mileage [km/l] (0-28.4)", min_value=0.0, value=15.0, step=1.0)
-    engine = st.number_input("Engine [cc] (624-5461)", min_value=0.0, value=3000.0, step=50.0)
-    power = st.number_input("Power [BHP] (35-500)", min_value=35, value=270.0, step=20)
-    seats = st.number_input("Seats (2-8)", min_value=1, max_value=10, value=5, step=1)
+
+    # ✅ Make all args FLOAT here
+    kilometers_driven = st.number_input(
+        "Kilometers_Driven [km] (8350-262000)",
+        min_value=0.0,
+        value=170000.0,
+        step=5000.0,
+    )
+
+    # ✅ Make all args FLOAT here
+    mileage = st.number_input(
+        "Mileage [km/l] (0-28.4)",
+        min_value=0.0,
+        value=15.0,
+        step=1.0,
+    )
+
+    # ✅ Make all args FLOAT here
+    engine = st.number_input(
+        "Engine [cc] (624-5461)",
+        min_value=624.0,
+        value=3000.0,
+        step=100.0,
+    )
+
+    # ✅ Make all args FLOAT here
+    power = st.number_input(
+        "Power [BHP] (35-500)",
+        min_value=35.0,
+        value=270.0,
+        step=20.0,
+    )
+
+    # ✅ Keep this INT consistently
+    seats = st.number_input("Seats (2-8)", min_value=2, max_value=10, value=5, step=1)
 
     input_df = pd.DataFrame([{
         "Segment": 0 if segment == "luxury segment" else 1,
