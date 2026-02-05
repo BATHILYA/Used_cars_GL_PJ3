@@ -25,43 +25,25 @@ def parse_args():
     args, _ = parser.parse_known_args()
     print(f'Arguments: {args}')                                                                                   
     return args
-def get_credential():
-    # Prefer AzureML job-managed auth when available (falls back cleanly)
-    try:
-        from azure.ai.ml.identity import AzureMLOnBehalfOfCredential  # type: ignore
-        return AzureMLOnBehalfOfCredential()
-    except Exception:
-        # Avoid interactive creds inside jobs
-        return DefaultAzureCredential(exclude_interactive_browser_credential=True)
 
 def main(args):
-    credential = get_credential()
-
+    # Ensure MLflow is pointing to the workspace tracking server if provided by AML
+    tracking_uri = os.getenv("MLFLOW_TRACKING_URI")
+    if tracking_uri:
+        mlflow.set_tracking_uri(tracking_uri)
+        mlflow.set_registry_uri(tracking_uri)
+        
+    # Register from local MLflow model directory
+    model_uri = f"file://{args.model_path}"                                                   
     '''Loads the best-trained model from the sweep job and registers it'''
     print("Registering ", args.model_name)
     print("Model path:", args.model_path)                                     
     print("Registering the best trained used cars price prediction model")
-    
+    print("MLflow tracking uri:", mlflow.get_tracking_uri())
 
     # Step 3: Register the logged model using its URI and model name, and retrieve its registered version.  
-    credential = DefaultAzureCredential()
-    ml_client = MLClient(
-        credential=credential,
-        subscription_id=os.environ["AZUREML_ARM_SUBSCRIPTION"],
-        resource_group_name=os.environ["AZUREML_ARM_RESOURCEGROUP"],
-        workspace_name=os.environ["AZUREML_ARM_WORKSPACE_NAME"],
-    )
-
-    registered = ml_client.models.create_or_update(
-        Model(
-            name=args.model_name,
-            path=args.model_path,     # this is your sweep output folder
-            type="mlflow_model",
-            description="Best model from sweep job",
-        )
-    )
-
-    model_version = registered.version
+    mv = mlflow.register_model(model_uri=model_uri, name=args.model_name)
+    model_version = mv.version
     print("Registered model version:", model_version)
 
     # Step 4: Write model registration details, including model name and version, into a JSON file in the specified output path.  
