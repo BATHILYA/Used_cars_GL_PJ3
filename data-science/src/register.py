@@ -28,16 +28,9 @@ def main(args):
     '''Loads the best-trained model from the sweep job and registers it'''
 
     print("Registering ", args.model_name)
-
-    # Step 1: Load the model from the specified path using `mlflow.sklearn.load_model` for further processing.  
-    # Load model
-    model = mlflow.sklearn.load_model(f"file://{args.model_path}")
-    
-    # Step 2: Log the loaded model in MLflow with the specified model name for versioning and tracking.  
-    # Log model using mlflow
+    print("Model path:", args.model_path)                                     
     print("Registering the best trained used cars price prediction model")
-
-    mlflow.sklearn.log_model(model, args.model_name)
+    mlflow.log_artifacts(args.model_path, artifact_path=args.model_name)
     
     # Step 3: Register the logged model using its URI and model name, and retrieve its registered version.  
 # Register logged model using mlflow
