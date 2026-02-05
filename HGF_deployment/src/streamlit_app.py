@@ -36,11 +36,11 @@ def main():
 
     input_df = pd.DataFrame([{
         "Segment": 0 if segment == "luxury segment" else 1,
-        "Kilometers_Driven": kilometers_driven,
-        "Mileage": mileage,
-        "Engine": engine,
-        "Power": power,
-        "Seats": seats,
+        "Kilometers_Driven": float(kilometers_driven),
+        "Mileage": float(mileage),
+        "Engine": float(engine),
+        "Power": float(power),
+        "Seats": int(seats),
     }])
 
     if st.button("Predict Price"):
@@ -49,7 +49,7 @@ def main():
         if hasattr(model, "feature_names_in_"):
             input_df = input_df.reindex(columns=list(model.feature_names_in_))
         pred = model.predict(input_df)
-        st.success(f"Estimated price: k USD {float(pred[0]):,.2f}")
+        st.success(f"Estimated price: Lakhs {float(pred[0]):,.2f}")
 
 if __name__ == "__main__":
     main()
