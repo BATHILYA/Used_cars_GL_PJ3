@@ -23,21 +23,25 @@ def parse_args():
     parser.add_argument('--model_path', type=str, help='Model directory')  # Hint: Specify the type for model_path (str)
     parser.add_argument("--model_info_output_path", type=str, help="Path to write model info JSON")  # Hint: Specify the type for model_info_output_path (str)
     args, _ = parser.parse_known_args()
-    print(f'Arguments: {args}')
-
+    print(f'Arguments: {args}')                                                                                   
     return args
+def get_credential():
+    # Prefer AzureML job-managed auth when available (falls back cleanly)
+    try:
+        from azure.ai.ml.identity import AzureMLOnBehalfOfCredential  # type: ignore
+        return AzureMLOnBehalfOfCredential()
+    except Exception:
+        # Avoid interactive creds inside jobs
+        return DefaultAzureCredential(exclude_interactive_browser_credential=True)
 
 def main(args):
+    credential = get_credential()
+
     '''Loads the best-trained model from the sweep job and registers it'''
     print("Registering ", args.model_name)
     print("Model path:", args.model_path)                                     
     print("Registering the best trained used cars price prediction model")
     
-
-    # In AML jobs, these are typically available automatically:
-    sub_id = os.environ["AZUREML_ARM_SUBSCRIPTION"]
-    rg = os.environ["AZUREML_ARM_RESOURCEGROUP"]
-    ws = os.environ["AZUREML_ARM_WORKSPACE_NAME"]
 
     # Step 3: Register the logged model using its URI and model name, and retrieve its registered version.  
     credential = DefaultAzureCredential()
