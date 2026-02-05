@@ -1,6 +1,7 @@
 import os
 import argparse
 import mlflow
+import mlflow.sklearn
 import joblib
 from huggingface_hub import HfApi, create_repo
 from huggingface_hub.utils import RepositoryNotFoundError
@@ -54,6 +55,8 @@ def main():
 
         This repository contains the exported model artifact: `{args.model_filename}`.
         """
+    with open(readme_path, "w", encoding="utf-8") as f:
+        f.write(card)
     api.upload_file(
         path_or_fileobj=readme_path,
         path_in_repo="README.md",

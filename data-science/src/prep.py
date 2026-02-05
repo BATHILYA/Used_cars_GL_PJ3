@@ -36,12 +36,16 @@ def main(args):  # Write the function name for the main data preparation logic
     df = pd.read_csv(args.raw_data)
 
     # ------- WRITE YOUR CODE HERE -------
-    # Step 1: Perform label encoding to convert categorical features into numerical values for model compatibility.  
-    # Encoding the categorical 'Segment' column
-    # Note: We should ideally use one-hot encoding here as there's no inherent order between the categories
-    # However, as we're using a decision tree model, label encoding also works here
-    label_encoder = LabelEncoder()
-    df['Segment'] = label_encoder.fit_transform(df['Segment'])
+    # Step 1: Deterministic encoding for Segment to keep training/inference consistent.
+    segment_map = {
+        "luxury segment": 0,
+        "non-luxury segment": 1,
+    }
+    unknown = set(df["Segment"].dropna().unique()) - set(segment_map.keys())
+    if unknown:
+        raise ValueError(f"Unknown Segment values found: {sorted(unknown)}")
+    df["Segment"] = df["Segment"].map(segment_map).astype(int)
+    mlflow.log_param("segment_encoding", str(segment_map))
 
 
     # Step 2: Split the dataset into training and testing sets using train_test_split with specified test size and random state.  
@@ -70,7 +74,7 @@ if __name__ == "__main__":
         f"Test dataset path: {args.test_data}",  # Print the test_data path
         f"Test-train ratio: {args.test_train_ratio}",  # Print the test_train_ratio
     ]
-
+                      
     for line in lines:
         print(line)    
         

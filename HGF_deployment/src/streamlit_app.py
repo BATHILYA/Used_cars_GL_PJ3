@@ -6,6 +6,10 @@ from huggingface_hub import hf_hub_download
 REPO_ID = "AbdramaneB/used-cars-price-prediction"
 MODEL_FILENAME = "best_price_model_v2.joblib"
 
+SEGMENT_MAP = {
+    "luxury segment": 0,
+    "non-luxury segment": 1,
+}
 @st.cache_resource(show_spinner="Loading model...")
 def load_model():
     MODEL_REPO_ID = "AbdramaneB/used-cars-price-model"
@@ -41,6 +45,9 @@ def main():
 
     if st.button("Predict Price"):
         model = load_model()
+        # Align columns to the training schema (prevents silent feature-order drift)
+        if hasattr(model, "feature_names_in_"):
+            input_df = input_df.reindex(columns=list(model.feature_names_in_))
         pred = model.predict(input_df)
         st.success(f"Estimated price: Lakhs {float(pred[0]):,.2f}")
 

@@ -84,12 +84,7 @@ jobs:
     display_name: register-model  # Provide the display name for the job
     code: ../../../data-science/src
     environment: azureml:used-cars-train-env@latest
-
-    # ---- Inject SP creds for DefaultAzureCredential -> EnvironmentCredential ----
-    environment_variables:
-      AZURE_TENANT_ID: ${{parent.inputs.sp_tenant_id}}
-      AZURE_CLIENT_ID: ${{parent.inputs.sp_client_id}}
-      AZURE_CLIENT_SECRET: ${{parent.inputs.sp_client_secret}}                                                   
+                                                  
     command: >-
       python register.py 
       --model_name ${{inputs.model_name}} 
